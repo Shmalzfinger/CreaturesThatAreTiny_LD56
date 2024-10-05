@@ -6,6 +6,10 @@ some sort of magnification rendering inside the glass
 print resolution. limit play area?
 use rayGUI for menu? change font. fade out text
 
+## try
+Color GetImageColor(Image image, int x, int y);    // Get image pixel color at (x, y) position
+
+
 ## Add game state
 0: initialising
 1: play

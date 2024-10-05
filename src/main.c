@@ -36,6 +36,14 @@ void handleInput() {
 		printf("KEY: %i\n", pressedKey);
 	}
 
+	float mouseWheel = GetMouseWheelMove();		// Get mouse wheel movement for X or Y, whichever is larger
+	if (mouseWheel > 0) {
+		printf("mouse wheel UP: %f\n", mouseWheel);	
+	}
+	else if (mouseWheel < 0) {
+		printf("mouse wheel DOWN: %f\n", mouseWheel);
+	}
+
 }
 
 // advance game loop; calculate stuff
@@ -62,7 +70,6 @@ int main ()
 
 	// Tell the window to use vysnc and work on high DPI displays
 	SetConfigFlags(FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI);
-
 
 	// Create the window and OpenGL context
 	int screenWidth = GetScreenWidth();                                   // Get current screen width
@@ -94,15 +101,19 @@ int main ()
 	// NOTE: Images are loaded in CPU memory(RAM); textures are loaded in GPU memory(VRAM)
 	// NOTE: Textures MUST be loaded after Window initialization (OpenGL context is required)
 
-	Image background = LoadImage("bg_01.png");			// Load image data into CPU memory (RAM)
+	Image background = LoadImage("bg_01.png");						// Load image data into CPU memory (RAM)
 	Texture2D tex_background = LoadTextureFromImage(background);	// Image converted to texture, GPU memory (RAM -> VRAM)
 	UnloadImage(background);										// Unload image data from CPU memory (RAM)
 
-	background = LoadImageFromTexture(tex_background);					// Load image from GPU texture (VRAM -> RAM)
-	UnloadTexture(tex_background);											// Unload texture from GPU memory (VRAM)
+	background = LoadImageFromTexture(tex_background);				// Load image from GPU texture (VRAM -> RAM)
+	UnloadTexture(tex_background);									// Unload texture from GPU memory (VRAM)
 
-	tex_background = LoadTextureFromImage(background);							// Recreate texture from retrieved image data (RAM -> VRAM)
-	UnloadImage(background);												// Unload retrieved image data from CPU memory (RAM)
+	tex_background = LoadTextureFromImage(background);				// Recreate texture from retrieved image data (RAM -> VRAM)
+	// UnloadImage(background);										// Unload retrieved image data from CPU memory (RAM)
+
+
+	//Image toEnlarge = LoadImage("bg_01.png");
+	Image toEnlarge;
 
 	// SetTargetFPS(60);
 
@@ -152,8 +163,23 @@ int main ()
 
 		// draw our texture to the screen
 		// if this is currently the glass, then do magnifying stuff!
-		//Image ImageCopy(Image image);	// Create an image duplicate (useful for transformations)
+		// Image Copy(Image image);	// Create an image duplicate (useful for transformations)
+		// TO DO: create image from current screen buffer, crop to mouse area, enlarge and display!
+		// OR!!!
+		// same, but add player sprite and crop it by glass texture
+		// Image imageCopy = LoadImageFromScreen();
+		//Image backgroundCopy = LoadImageFromTexture(tex_background);
+		
+		// Rectangle rect1 = { GetMouseX() - 32, GetMouseY() - 32, 64, 64};
+		Rectangle rect1 = { 290, 390, 64, 64 };
 
+		Image backgroundCopy = ImageFromImage(background, rect1);        // Create an image from another image piece
+		// struct Color;                  // Color, 4 components, R8G8B8A8 (32bit)
+		// struct Rectangle;              // Rectangle, 4 components
+		Rectangle rect = {0, 0, 64, 64};
+		Color tinCol = { 0, 0, 1, 1 };
+		ImageDraw(& toEnlarge, backgroundCopy, rect, rect, tinCol);	// Draw a source image within a destination image (tint applied to source)
+		
 		DrawTexture(glass, GetMouseX(), GetMouseY(), WHITE);
 
 		// end the frame and get ready for the next one  (display frame, poll input, etc...)
