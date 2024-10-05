@@ -113,7 +113,7 @@ int main ()
 
 
 	//Image toEnlarge = LoadImage("bg_01.png");
-	Image toEnlarge;
+	Image toEnlarge = LoadImage("bg_01.png");
 
 	// SetTargetFPS(60);
 
@@ -144,8 +144,8 @@ int main ()
 		DrawText("Creatures That Are Tiny", 20, 20, 20, WHITE);
 		DrawText("by Treeation", 20, 40, 20, WHITE);
 
-		DrawText(str1, 20, 120, 20, BLUE);		
-		
+		DrawText(str1, 20, 120, 20, BLUE);
+
 		char str3[50] = "Current Monitor: ";
 		int O = GetCurrentMonitor();
 		char str4[1];
@@ -169,22 +169,33 @@ int main ()
 		// same, but add player sprite and crop it by glass texture
 		// Image imageCopy = LoadImageFromScreen();
 		//Image backgroundCopy = LoadImageFromTexture(tex_background);
-		
-		// Rectangle rect1 = { GetMouseX() - 32, GetMouseY() - 32, 64, 64};
-		Rectangle rect1 = { 290, 390, 64, 64 };
 
-		Image backgroundCopy = ImageFromImage(background, rect1);        // Create an image from another image piece
+		// Rectangle rect1 = { GetMouseX() - 32, GetMouseY() - 32, 64, 64};
+		Rectangle rect1 = { 0, 0, 64, 64 };
+		// Image backgroundCopy = ImageFromImage(background, rect1);        // Create an image from another image piece
 		// struct Color;                  // Color, 4 components, R8G8B8A8 (32bit)
-		// struct Rectangle;              // Rectangle, 4 components
-		Rectangle rect = {0, 0, 64, 64};
-		Color tinCol = { 0, 0, 1, 1 };
-		ImageDraw(& toEnlarge, backgroundCopy, rect, rect, tinCol);	// Draw a source image within a destination image (tint applied to source)
-		
+		Rectangle rectSrc = { 0, 0, 64, 64 };
+		Rectangle rectDst = { 0, 0, 64, 64 };
+		// 4294967295
+		// Color tintCol = { 4294967295 / 2, 4294967295, 4294967295, 255 };
+		ImageDraw(&toEnlarge, background, rectDst, rectSrc, WHITE);	// Draw a source image within a destination image (tint applied to source)
+		Texture2D newTexture = LoadTextureFromImage(toEnlarge);
+		//DrawTexture(newTexture, GetMouseX() - 128, GetMouseY() - 128, RED);
+		Rectangle rect3 = { GetMouseX() - 32, GetMouseY() - 32, 64, 64 };
+		Vector2 position = (Vector2){ GetMouseX(), GetMouseY() };
+		DrawTextureEx(newTexture, position, 0, 4, WHITE);  // Draw a Texture2D with extended parameters
+		//DrawTextureRec(newTexture, rect3, position, SKYBLUE);
+		// Vector2 origin = (Vector2){ 0, 0 };
+		Vector2 origin = (Vector2){ 0, 0 };
+		// Rectangle rectSrc = { 0, 0, 32, 32 };
+		// Rectangle rectDst = { 0, 0, 64, 64 };
+		// DrawTexturePro(newTexture, rectSrc, rectDst, origin, 0, WHITE); // Draw a part of a texture defined by a rectangle with 'pro' parameters
 		DrawTexture(glass, GetMouseX(), GetMouseY(), WHITE);
 
 		// end the frame and get ready for the next one  (display frame, poll input, etc...)
 		EndDrawing();
 
+		UnloadTexture(newTexture);
 
 		handleInput();
 
@@ -197,6 +208,7 @@ int main ()
 	ShowCursor();
 	// unload our texture so it can be cleaned up
 	UnloadTexture(glass);
+
 
 	// destory the window and cleanup the OpenGL context
 	CloseWindow();
