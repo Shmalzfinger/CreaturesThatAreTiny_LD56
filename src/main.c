@@ -9,32 +9,42 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+int posArray[2] = { 300, 400 };
+
 void setup() {
 	// initialization
+	//Font LoadFont("VeraMono.ttf");
+
+	
 }
 
 void draw() {
-	// drawing
-
 }
 
 void drawPlayer(int x, int y) {
 	DrawPixel(x, y, WHITE);
-	// DrawPixelV(pos, WHITE);
 }
 
 void handleInput() {
 
-	int pressedKey = GetKeyPressed();	// Get key pressed (keycode), call it multiple times for keys queued, returns 0 when the queue is empty
-	
-	switch (pressedKey) {
-		case 256: printf("ESCAPED! \n");	break;
-		default:							break;
-	}
+	//int pressedKey = GetKeyPressed();
+	//
+	//switch (pressedKey) {
+	//	case 87:	posArray[1] = posArray[1] - 1;	break;
+	//	case 256:	printf("ESCAPED! \n");			break;
+	//	default:									break;
+	//}
 
-	if (pressedKey != 0) {
-		printf("KEY: %i\n", pressedKey);
+	if (IsKeyDown(KEY_RIGHT)) {
+		posArray[0] += 1;
 	}
+	if (IsKeyDown(KEY_LEFT)) posArray[0] -= 1;
+	if (IsKeyDown(KEY_UP)) posArray[1] -= 1;
+	if (IsKeyDown(KEY_DOWN)) posArray[1] += 1;
+
+	//if (pressedKey != 0) {
+	//	printf("KEY: %i\n", pressedKey);
+	//}
 
 	float mouseWheel = GetMouseWheelMove();		// Get mouse wheel movement for X or Y, whichever is larger
 	if (mouseWheel > 0) {
@@ -61,7 +71,7 @@ int main ()
 	int playerX = 300;
 	int playerY = 400;
 	Vector2 playerPos = (Vector2){ 300, 400 };
-	int posArray[2] = {300, 400};
+
 	
 	// sounds
 	//struct Wave; // Wave type, defines audio wave data
