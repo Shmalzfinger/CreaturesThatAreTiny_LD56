@@ -1,6 +1,8 @@
 # TO DO
 
-display sprite underneath glass if playerPos in glassArea
+only allow glass to stay in bounds
+
+~~display sprite underneath glass if playerPos in glassArea~~
 
 display SUCCESS msg when goal area is colliding with player -> exit game
 
