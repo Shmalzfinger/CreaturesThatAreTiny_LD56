@@ -8,7 +8,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <limits.h>		// for INT_MIN + INT_MAX
+#include <limits.h>		// possibly needed for INT_MIN + INT_MAX
 
 int posArray[2] = { 300, 400 };
 
@@ -21,10 +21,6 @@ bool pause = false;
 bool collision = false;
 
 void setup() {
-	// initialization
-
-
-	
 }
 
 void draw() {
@@ -35,7 +31,6 @@ void drawPlayer(int x, int y) {
 }
 
 bool isInBoundaries(x, y) {
-	// true if this condition is met
 	if ((x > 0) && (x < (worldSizeX - 2)) && (y > 0) && (y < (worldSizeY - 2))) {
 		return true;
 	}
@@ -45,7 +40,6 @@ bool isInBoundaries(x, y) {
 }
 
 void handleInput() {
-
 	if (IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_D)) {
 		if (posArray[0] < (worldSizeX - 1)) {
 			posArray[0] += 1;
@@ -82,12 +76,10 @@ void handleInput() {
 	else if (mouseWheel < 0) {
 		printf("mouse wheel DOWN: %f\n", mouseWheel);
 	}
-
 }
 
 // advance game loop; calculate stuff
 void worldTick() {
-
 }
 
 int main ()
@@ -100,14 +92,13 @@ int main ()
 
 	// audio stuff
 	InitAudioDevice();
-	SetMasterVolume(0.03f);
+	SetMasterVolume(0.2f);
 	Music music = LoadMusicStream("resources/music/song_01.mp3");
 	Sound snd_beep1 = LoadSound("resources/sfx/beep_01.wav");
 	PlayMusicStream(music);
 
 	Font fontMono = LoadFont("VeraMono.ttf");
 	
-	// sounds
 	//struct Wave; // Wave type, defines audio wave data
 	//struct Sound; // Basic Sound source and buffer
 	//struct Music; // Music type (file streaming from memory)
@@ -277,11 +268,11 @@ int main ()
 		int cropSize = 16;
 		// int cropX1 = max(cropSize, GetMouseX());
 		if ((GetMouseX() > worldOriginX + cropSize) && (GetMouseX() < (worldSizeX - cropSize))) {
-			cropX1 = GetMouseX(); //+ cropSize;
+			cropX1 = GetMouseX() + 32; //+ cropSize;
 		}
 		int cropX2 = cropX1 + cropSize;
 		if ((GetMouseY() > worldOriginY + cropSize) && (GetMouseY() < (worldSizeY - cropSize))) {
-			cropY1 = GetMouseY(); // +cropSize;
+			cropY1 = GetMouseY() + 32; // +cropSize;
 		}
 		// int cropY1 = min(worldSizeY - cropSize, GetMouseY());
 		int cropY2 = cropY1 + cropSize;
@@ -343,23 +334,15 @@ int main ()
 		worldTick();
 	}
 
-
-
 	// cleanup
 	ShowCursor();
-	// unload our texture so it can be cleaned up
 	UnloadTexture(glass);
 	UnloadImage(toEnlarge);
 	UnloadFont(fontMono);
 	void UnloadImageColors(Color * colors);
-
 	UnloadMusicStream(music);   // Unload music stream buffers from RAM
 	UnloadSound(snd_beep1);
 	CloseAudioDevice();         // Close audio device (music streaming is automatically stopped)
-
-	// destory the window and cleanup the OpenGL context
 	CloseWindow();
-
 	return 0;
-
 }
