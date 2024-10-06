@@ -151,6 +151,8 @@ int main ()
 
 	//Image toEnlarge = LoadImage("bg_01.png");
 	Image toEnlarge = LoadImage("bg_01.png");
+
+	Image alphaMask = LoadImage("zoom_mask_smol.png");
 	
 	//Image Enlarged = ImageResizeNN(toEnlarge);
 	// To draw a resized texture, you should SetTextureFilter(texture, TEXTURE_FILTER_POINT).
@@ -279,8 +281,10 @@ int main ()
 		Rectangle cropRect = { cropX1, cropY1, cropSize, cropSize };
 		
 		//ImageCrop(& toEnlarge, cropRect);
+		ImageAlphaPremultiply(&toEnlarge);
+		ImageAlphaMask(&toEnlarge, alphaMask);
+		//Texture2D newTexture = LoadTextureFromImage(toEnlarge);
 		Texture2D newTexture = LoadTextureFromImage(toEnlarge);
-
 		
 		// Texture2D 
 		//DrawCircle(GetMouseX() - 32, GetMouseY() - 32, 64, YELLOW);	// Draw a color-filled circle
@@ -300,11 +304,15 @@ int main ()
 		// Origin of the texture (rotation/scale point), it's relative to destination rectangle size
 		//Vector2 origin = { (float)frameWidth, (float)frameHeight };
 		Vector2 origin = { (0, 0) };
-
 		int rotation = 0;
 		//DrawTexturePro(Texture2D texture, Rectangle source, Rectangle dest, Vector2 origin, float rotation, Color tint); 
 		// text, source, dest, origin, rotation, color
+		
+		// zoomies
+		//BeginBlendMode(0);                              // Begin blending mode (alpha, additive, multiplied, subtract, custom)
+		
 		DrawTexturePro(newTexture, cropRect, blonkRect, origin, (float)rotation, WHITE);
+		//EndBlendMode(0);                                    // End blending mode (reset to default: alpha blending)
 		
 		// here upscaling works:
 		//DrawTextureEx(newTexture, position, 0, 4, WHITE);  // Draw a Texture2D with extended parameters
