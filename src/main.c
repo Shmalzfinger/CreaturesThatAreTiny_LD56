@@ -21,13 +21,13 @@ const int worldSizeY = 900;
 bool pause = false;
 bool collision = false;
 
-//Color colors = { 0, 0, 0, 0 };
 bool RightForbidden = false;
 bool LeftForbidden = false;
 bool UpForbidden = false;
 bool DownForbidden = false;
 
 int playerSpriteIndexX = 0;  int playerSpriteIndexY = 0;
+//int itemsMax = 3;
 
 void setup() {
 }
@@ -49,41 +49,47 @@ bool isInBoundaries(x, y) {
 }
 
 // function declarations
-bool isColorForbidden(int, int, Color);
+//bool isColorForbidden(int, int, Color);
 
 void handleInput() {
 	// optimize: only check if a button is pressed
-	if (IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_D)) {
-		if ((posArray[0] < (worldSizeX - 1)) && !RightForbidden) {	// and if that color is not blu 0,13,147
-			posArray[0] += 1;
-			playerSpriteIndexX = 3;
-		} else {
-			collision = true;
+	if (GetKeyPressed != 0) {
+	
+		if (IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_D)) {
+			if ((posArray[0] < (worldSizeX - 1)) && !RightForbidden) {
+				posArray[0] += 1;
+				playerSpriteIndexX = 3;
+			} else {
+				collision = true;
+			}
 		}
-	}
-	if (IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_A)) {
-		if (posArray[0] > (worldOriginX + 1)) {
-			posArray[0] -= 1;
-			playerSpriteIndexX = 0;
-		} else {
-			collision = true;
+		if ((IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_A)) && !LeftForbidden) {
+			if (posArray[0] > (worldOriginX + 1)) {
+				posArray[0] -= 1;
+				playerSpriteIndexX = 0;
+			} else {
+				collision = true;
+			}
 		}
-	}
-	if (IsKeyDown(KEY_UP) || IsKeyDown(KEY_W)) {
-		if (posArray[1] > (worldOriginY + 1)) {
-			posArray[1] -= 1;
-			playerSpriteIndexY = 0;
-		} else {
-			collision = true;
+		if ((IsKeyDown(KEY_UP) || IsKeyDown(KEY_W)) && !UpForbidden) {
+			if (posArray[1] > (worldOriginY + 1)) {
+				posArray[1] -= 1;
+				playerSpriteIndexY = 0;
+			} else {
+				collision = true;
+			}
 		}
-	}
-	if (IsKeyDown(KEY_DOWN) || IsKeyDown(KEY_S)) {
-		if (posArray[1] < (worldSizeY - 1)) {
-			posArray[1] += 1;
-			playerSpriteIndexY = 3;
-		} else {
-			collision = true;
+		if ((IsKeyDown(KEY_DOWN) || IsKeyDown(KEY_S)) && !DownForbidden) {
+			if (posArray[1] < (worldSizeY - 1)) {
+				posArray[1] += 1;
+				playerSpriteIndexY = 3;
+			} else {
+				collision = true;
+			}
 		}
+	}	// if no KEY was pressed 
+	else {
+		playerSpriteIndexX = 2; playerSpriteIndexY = 2;
 	}
 
 	float mouseWheel = GetMouseWheelMove();
@@ -249,13 +255,11 @@ int main ()
 
 		char str6[4];
 		_itoa(GetMouseY(), str6, 10);
-		//_itoa(posArray[1], str6, 10);
 		DrawText(str6, 80, 200, 20, RED);
 
 		char str7[16];
 		char str8[16];
 		char str9[16];
-		//Color Player GetPixelColor(void* srcPtr, int format);
 		int colorIndex = (posArray[1] * backgroundWidth) + posArray[0];
 		Color pixel = colors[colorIndex];
 		_itoa(pixel.r, str7, 10);
@@ -278,6 +282,33 @@ int main ()
 		}
 		else {
 			RightForbidden = false;
+		}
+		// Get left pixel color
+		colorIndex = (posArray[1] * backgroundWidth) + posArray[0] - 1;
+		pixel = colors[colorIndex];
+		if (pixel.r == 0 && pixel.g == 13 && pixel.b == 147) {
+			LeftForbidden = true;
+		}
+		else {
+			LeftForbidden = false;
+		}
+		// Get up pixel color
+		colorIndex = ((posArray[1] - 1)* backgroundWidth) + posArray[0];
+		pixel = colors[colorIndex];
+		if (pixel.r == 0 && pixel.g == 13 && pixel.b == 147) {
+			UpForbidden = true;
+		}
+		else {
+			UpForbidden = false;
+		}
+		// Get down pixel color
+		colorIndex = ((posArray[1] + 1) * backgroundWidth) + posArray[0];
+		pixel = colors[colorIndex];
+		if (pixel.r == 0 && pixel.g == 13 && pixel.b == 147) {
+			DownForbidden = true;
+		}
+		else {
+			DownForbidden = false;
 		}
 
 		// draw avatar
@@ -354,15 +385,17 @@ int main ()
 		// here upscaling works:
 		//DrawTextureEx(newTexture, position, 0, 4, WHITE);  // Draw a Texture2D with extended parameters
 		
-		// draw BIG smol player from spritesheet
-		float spriteSelX = 0;
-		playerRec.x = playerSpriteIndexX * (float)playerSheet.width / playerSpritesTotalX;
-		playerRec.y = playerSpriteIndexY * (float)playerSheet.height / playerSpritesTotalY;
-		//playerRec.x = 0;
+		// if player is in glasse area, draw BIG smol player from spritesheet
+		// CheckCollisionSpheres(Vector3 center1, float radius1, Vector3 center2, float radius2);
+		// vector3 center1
+		if (CheckCollisionCircles((Vector2) { posArray[0], posArray[1] }, 16, (Vector2) { GetMouseX() + 56, GetMouseY() + 56 }, 16)) {
+			playerRec.x = playerSpriteIndexX * (float)playerSheet.width / playerSpritesTotalX;
+			playerRec.y = playerSpriteIndexY * (float)playerSheet.height / playerSpritesTotalY;
+			//playerRec.x = 0;
 		
-		DrawTextureRec(playerSheet, playerRec, (Vector2) { posArray[0] - 16, posArray[1] - 16 }, WHITE);
-		//DrawTexture(playerSheet, posArray[0], posArray[1], WHITE);
-
+			DrawTextureRec(playerSheet, playerRec, (Vector2) { posArray[0] - 16, posArray[1] - 16 }, WHITE);
+			//DrawTexture(playerSheet, posArray[0], posArray[1], WHITE);
+		}
 		//DrawTextureRec(newTexture, rect3, position, SKYBLUE);
 		// Vector2 origin = (Vector2){ 0, 0 };
 		//Vector2 origin = (Vector2){ 0, 0 };
