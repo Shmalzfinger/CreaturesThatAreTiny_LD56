@@ -12,6 +12,7 @@
 
 int posArray[2] = { 300, 400 };
 
+
 const int worldOriginX = 0;
 const int worldOriginY = 0;
 const int worldSizeX = 1600;
@@ -19,6 +20,12 @@ const int worldSizeY = 900;
 
 bool pause = false;
 bool collision = false;
+
+//Color colors = { 0, 0, 0, 0 };
+bool RightForbidden = false;
+bool LeftForbidden = false;
+bool UpForbidden = false;
+bool DownForbidden = false;
 
 int playerSpriteIndexX = 0;  int playerSpriteIndexY = 0;
 
@@ -41,9 +48,13 @@ bool isInBoundaries(x, y) {
 	}
 }
 
+// function declarations
+bool isColorForbidden(int, int, Color);
+
 void handleInput() {
+	// optimize: only check if a button is pressed
 	if (IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_D)) {
-		if (posArray[0] < (worldSizeX - 1)) {
+		if ((posArray[0] < (worldSizeX - 1)) && !RightForbidden) {	// and if that color is not blu 0,13,147
 			posArray[0] += 1;
 			playerSpriteIndexX = 3;
 		} else {
@@ -156,7 +167,7 @@ int main ()
 	Color* colors = LoadImageColors(background);
 	int backgroundWidth = background.width;
 	Texture2D tex_background = LoadTextureFromImage(background);	// Image converted to texture, GPU memory (RAM -> VRAM)
-	UnloadImage(background);										// Unload image data from CPU memory (RAM)
+	//UnloadImage(background);										// Unload image data from CPU memory (RAM)
 
 	background = LoadImageFromTexture(tex_background);				// Load image from GPU texture (VRAM -> RAM)
 	UnloadTexture(tex_background);									// Unload texture from GPU memory (VRAM)
@@ -244,9 +255,9 @@ int main ()
 		char str7[16];
 		char str8[16];
 		char str9[16];
-		//Color GetPixelColor(void* srcPtr, int format);
-		int index = (posArray[1] * backgroundWidth) + posArray[0];
-		Color pixel = colors[index];
+		//Color Player GetPixelColor(void* srcPtr, int format);
+		int colorIndex = (posArray[1] * backgroundWidth) + posArray[0];
+		Color pixel = colors[colorIndex];
 		_itoa(pixel.r, str7, 10);
 		_itoa(pixel.g, str8, 10);
 		_itoa(pixel.b, str9, 10);
@@ -258,6 +269,16 @@ int main ()
 		DrawText(str7, 20, 240, 20, RED);
 		DrawText(str8, 80, 240, 20, GREEN);
 		DrawText(str9, 140, 240, 20, BLUE);
+
+		// Get right pixel color
+		colorIndex = (posArray[1] * backgroundWidth) + posArray[0] + 1;
+		pixel = colors[colorIndex];
+		if (pixel.r == 0 && pixel.g == 13 && pixel.b == 147) {
+			RightForbidden = true;
+		}
+		else {
+			RightForbidden = false;
+		}
 
 		// draw avatar
 		drawPlayer(posArray[0], posArray[1]);
@@ -381,3 +402,23 @@ int main ()
 	CloseWindow();
 	return 0;
 }
+
+// function definitions
+bool isColorForbidden(int x, int y, Color* colors) {
+	//Image background2 = LoadImage("bg_01.png");
+	//Color* colors = LoadImageColors(background2);
+	int colorIndex = (y * worldSizeX) + x;
+	//Color pixel = colors[colorIndex];
+	//UnloadImage(background2);
+
+	//if (pixel.r == 0 && pixel.g == 13 && pixel.b == 147) {
+	//	return true;
+	//}
+	//else {
+	//	return false;
+	//}
+	//_itoa(pixel.r, str7, 10);
+	//_itoa(pixel.g, str8, 10);
+	//_itoa(pixel.b, str9, 10);
+}
+
