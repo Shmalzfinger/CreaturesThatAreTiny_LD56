@@ -4,7 +4,7 @@
 */
 
 #include "raylib.h"
-#include "resource_dir.h"	// utility header for SearchAndSetResourceDir
+#include "resource_dir.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,9 +16,11 @@ const int worldOriginY = 0;
 const int worldSizeX = 1600;
 const int worldSizeY = 900;
 
+bool pause = false;
+
 void setup() {
 	// initialization
-	//Font LoadFont("VeraMono.ttf");
+	
 
 	
 }
@@ -42,14 +44,6 @@ bool isInBoundaries(x, y) {
 
 void handleInput() {
 
-	//int pressedKey = GetKeyPressed();
-	//
-	//switch (pressedKey) {
-	//	case 87:	posArray[1] = posArray[1] - 1;	break;
-	//	case 256:	printf("ESCAPED! \n");			break;
-	//	default:									break;
-	//}
-
 	if (IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_D)) {
 		if (posArray[0] < (worldSizeX - 1)) {
 			posArray[0] += 1;
@@ -70,11 +64,8 @@ void handleInput() {
 			posArray[1] += 1;
 		}
 	}
-	//if (pressedKey != 0) {
-	//	printf("KEY: %i\n", pressedKey);
-	//}
 
-	float mouseWheel = GetMouseWheelMove();		// Get mouse wheel movement for X or Y, whichever is larger
+	float mouseWheel = GetMouseWheelMove();
 	if (mouseWheel > 0) {
 		printf("mouse wheel UP: %f\n", mouseWheel);	
 	}
@@ -97,6 +88,13 @@ int main ()
 	int playerY = 400;
 	Vector2 playerPos = (Vector2){ 300, 400 };
 
+	// audio stuff
+	InitAudioDevice();
+	SetMasterVolume(0.03);
+	Music music = LoadMusicStream("resources/music/song_01.mp3");
+	PlayMusicStream(music);
+
+	Font fontMono = LoadFont("VeraMono.ttf");
 	
 	// sounds
 	//struct Wave; // Wave type, defines audio wave data
@@ -162,8 +160,30 @@ int main ()
 	//strcat(str1, str2);
 
 	// game loop
+
+	while (!IsMusicReady(music)) {
+		//wait(5);
+	}
+
 	while (!WindowShouldClose())		// run the loop untill the user presses ESCAPE or presses the Close button on the window
 	{
+		UpdateMusicStream(music);   // Update music buffer with new stream data
+		
+		// Restart music playing (stop and play)
+		if (IsKeyPressed(KEY_SPACE))
+		{
+			StopMusicStream(music);
+			PlayMusicStream(music);
+		}
+
+		// Pause/Resume music playing
+		if (IsKeyPressed(KEY_P))
+		{
+			pause = !pause;
+
+			if (pause) PauseMusicStream(music);
+			else ResumeMusicStream(music);
+		}
 		//draw();
 		BeginDrawing();
 
@@ -178,24 +198,25 @@ int main ()
 		drawPlayer(posArray[0], posArray[1]);
 
 		// draw some text using the default font
-		DrawText("Creatures That Are Tiny", 20, 20, 20, WHITE);
-		DrawText("by Treeation", 20, 40, 20, WHITE);
+		// DrawText("Creatures That Are Tiny", 20, 20, 20, WHITE);
+		DrawTextEx(fontMono, "Creatures That Are Tiny", (Vector2) { 20, 20 }, 24, 1, WHITE); // Draw text using font and additional parameters
+		DrawText("by Treeation", 20, 40, 20, BEIGE);
 
 		DrawText(str1, 20, 120, 20, BLUE);
 
 		char str3[50] = "Current Monitor: ";
-		int O = GetCurrentMonitor();
+		int nrMon = GetCurrentMonitor();
 		char str4[1];
-		_itoa(O, str4, 10);
+		_itoa(nrMon, str4, 10);
 		strcat(str3, str4);
 		DrawText(str3, 20, 140, 20, BLUE);
 
-		char str5[3];
+		char str5[4];
 		// _itoa(GetMouseX(), str5, 10);
 		_itoa(posArray[0], str5, 10);
 		DrawText(str5, 20, 200, 20, RED);
 
-		char str6[3];
+		char str6[4];
 		// _itoa(GetMouseY(), str6, 10);
 		_itoa(posArray[1], str6, 10);
 		DrawText(str6, 80, 200, 20, RED);
@@ -241,7 +262,7 @@ int main ()
 		DrawTextureEx(newTexture, position, 0, 4, WHITE);  // Draw a Texture2D with extended parameters
 		//DrawTextureRec(newTexture, rect3, position, SKYBLUE);
 		// Vector2 origin = (Vector2){ 0, 0 };
-		Vector2 origin = (Vector2){ 0, 0 };
+		//Vector2 origin = (Vector2){ 0, 0 };
 		// Rectangle rectSrc = { 0, 0, 32, 32 };
 		// Rectangle rectDst = { 0, 0, 64, 64 };
 		// DrawTexturePro(newTexture, rectSrc, rectDst, origin, 0, WHITE); // Draw a part of a texture defined by a rectangle with 'pro' parameters
@@ -264,7 +285,11 @@ int main ()
 	// unload our texture so it can be cleaned up
 	UnloadTexture(glass);
 	UnloadImage(toEnlarge);
+	UnloadFont(fontMono);
 	void UnloadImageColors(Color * colors);
+
+	UnloadMusicStream(music);   // Unload music stream buffers from RAM
+	CloseAudioDevice();         // Close audio device (music streaming is automatically stopped)
 
 	// destory the window and cleanup the OpenGL context
 	CloseWindow();
