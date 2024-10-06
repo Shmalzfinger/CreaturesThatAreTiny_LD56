@@ -20,6 +20,8 @@ const int worldSizeY = 900;
 bool pause = false;
 bool collision = false;
 
+int playerSpriteIndexX = 0;  int playerSpriteIndexY = 0;
+
 void setup() {
 }
 
@@ -43,6 +45,7 @@ void handleInput() {
 	if (IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_D)) {
 		if (posArray[0] < (worldSizeX - 1)) {
 			posArray[0] += 1;
+			playerSpriteIndexX = 3;
 		} else {
 			collision = true;
 		}
@@ -50,6 +53,7 @@ void handleInput() {
 	if (IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_A)) {
 		if (posArray[0] > (worldOriginX + 1)) {
 			posArray[0] -= 1;
+			playerSpriteIndexX = 0;
 		} else {
 			collision = true;
 		}
@@ -57,6 +61,7 @@ void handleInput() {
 	if (IsKeyDown(KEY_UP) || IsKeyDown(KEY_W)) {
 		if (posArray[1] > (worldOriginY + 1)) {
 			posArray[1] -= 1;
+			playerSpriteIndexY = 0;
 		} else {
 			collision = true;
 		}
@@ -64,6 +69,7 @@ void handleInput() {
 	if (IsKeyDown(KEY_DOWN) || IsKeyDown(KEY_S)) {
 		if (posArray[1] < (worldSizeY - 1)) {
 			posArray[1] += 1;
+			playerSpriteIndexY = 3;
 		} else {
 			collision = true;
 		}
@@ -126,6 +132,16 @@ int main ()
 	// Utility function from resource_dir.h to find the resources folder and set it as the current working directory so we can load from it
 	SearchAndSetResourceDir("resources");
 
+	Image imgSpriteSheet = LoadImage("spritesheet_128_3.png");
+	Texture playerSheet = LoadTextureFromImage(imgSpriteSheet);
+	//Texture playerSheet = LoadTexture("spritesheet_512.png");
+
+	int playerSpritesTotal = 16;
+	float playerSpritesTotalX = 4;
+	float playerSpritesTotalY = 4;
+	Rectangle playerRec = { 0.0f, 0.0f, (float)playerSheet.width / playerSpritesTotalX, (float)playerSheet.height / playerSpritesTotalY };
+	// Rectangle playerRec = { 0, 0, playerSheet.width, playerSheet.height };
+
 	// Load a texture from the resources directory - PNG ALPHA should be possible!?
 	Texture glass = LoadTexture("m_glass_trans.png");
 
@@ -152,7 +168,7 @@ int main ()
 	//Image toEnlarge = LoadImage("bg_01.png");
 	Image toEnlarge = LoadImage("bg_01.png");
 
-	Image alphaMask = LoadImage("zoom_mask_smol.png");
+	//Image alphaMask = LoadImage("zoom_mask_smol.png");
 	
 	//Image Enlarged = ImageResizeNN(toEnlarge);
 	// To draw a resized texture, you should SetTextureFilter(texture, TEXTURE_FILTER_POINT).
@@ -201,15 +217,12 @@ int main ()
 		// DrawTexture(tex_background, screenWidth / 2 - tex_background.width / 2, screenHeight / 2 - tex_background.height / 2, WHITE);
 		DrawTexture(tex_background, screenWidth, screenHeight, WHITE);
 
-		// draw avatar
-		drawPlayer(posArray[0], posArray[1]);
-
 		// draw some text using the default font
 		// DrawText("Creatures That Are Tiny", 20, 20, 20, WHITE);
 		DrawTextEx(fontMono, "Creatures That Are Tiny", (Vector2) { 20, 20 }, 24, 1, WHITE); // Draw text using font and additional parameters
 		DrawText("by Treeation", 20, 40, 20, BEIGE);
 
-		DrawText("MOVE THE CROPPING RECTANGLE WITH MOUSE", 20, 120, 20, DARKPURPLE);
+		DrawText("MOVE WITH WASD OR ARROW KEYS AND USE YOURR MOUSE :)", 20, 120, 20, DARKPURPLE);
 
 		char str3[50] = "Current Monitor: ";
 		int nrMon = GetCurrentMonitor();
@@ -246,6 +259,9 @@ int main ()
 		DrawText(str8, 80, 240, 20, GREEN);
 		DrawText(str9, 140, 240, 20, BLUE);
 
+		// draw avatar
+		drawPlayer(posArray[0], posArray[1]);
+
 		// draw our texture to the screen
 		// if this is currently the glass, then do magnifying stuff!
 		// Image Copy(Image image);	// Create an image duplicate (useful for transformations)
@@ -281,8 +297,8 @@ int main ()
 		Rectangle cropRect = { cropX1, cropY1, cropSize, cropSize };
 		
 		//ImageCrop(& toEnlarge, cropRect);
-		ImageAlphaPremultiply(&toEnlarge);
-		ImageAlphaMask(&toEnlarge, alphaMask);
+		//ImageAlphaPremultiply(&toEnlarge);
+		//ImageAlphaMask(&toEnlarge, alphaMask);
 		//Texture2D newTexture = LoadTextureFromImage(toEnlarge);
 		Texture2D newTexture = LoadTextureFromImage(toEnlarge);
 		
@@ -310,13 +326,22 @@ int main ()
 		
 		// zoomies
 		//BeginBlendMode(0);                              // Begin blending mode (alpha, additive, multiplied, subtract, custom)
-		
+		//SetTextureFilter(newTexture, 4);
 		DrawTexturePro(newTexture, cropRect, blonkRect, origin, (float)rotation, WHITE);
 		//EndBlendMode(0);                                    // End blending mode (reset to default: alpha blending)
 		
 		// here upscaling works:
 		//DrawTextureEx(newTexture, position, 0, 4, WHITE);  // Draw a Texture2D with extended parameters
 		
+		// draw BIG smol player from spritesheet
+		float spriteSelX = 0;
+		playerRec.x = playerSpriteIndexX * (float)playerSheet.width / playerSpritesTotalX;
+		playerRec.y = playerSpriteIndexY * (float)playerSheet.height / playerSpritesTotalY;
+		//playerRec.x = 0;
+		
+		DrawTextureRec(playerSheet, playerRec, (Vector2) { posArray[0] - 16, posArray[1] - 16 }, WHITE);
+		//DrawTexture(playerSheet, posArray[0], posArray[1], WHITE);
+
 		//DrawTextureRec(newTexture, rect3, position, SKYBLUE);
 		// Vector2 origin = (Vector2){ 0, 0 };
 		//Vector2 origin = (Vector2){ 0, 0 };
@@ -345,7 +370,9 @@ int main ()
 	// cleanup
 	ShowCursor();
 	UnloadTexture(glass);
-	UnloadImage(toEnlarge);
+	UnloadTexture(playerSheet);
+	UnloadImage(toEnlarge); 
+	//UnloadImage(alphaMask);
 	UnloadFont(fontMono);
 	void UnloadImageColors(Color * colors);
 	UnloadMusicStream(music);   // Unload music stream buffers from RAM

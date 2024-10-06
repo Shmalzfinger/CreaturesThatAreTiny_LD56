@@ -1,5 +1,16 @@
 # TO DO
 
+
+display sprite underneath glass if playerPos in glassArea
+ bool CheckCollisionSpheres(Vector3 center1, float radius1, Vector3 center2, float radius2);   // Check collision between two spheres
+ // Draw a part of a texture defined by a rectangle
+ DrawTextureRec(Texture2D texture, Rectangle source, Vector2 position, Color tint);   
+ // or Draw a part of a texture defined by a rectangle with 'pro' parameters
+DrawTexturePro(Texture2D texture, Rectangle source, Rectangle dest, Vector2 origin, float rotation, Color tint); 
+
+add zoom mask
+add timer
+
 Add license
 
 some sort of magnification rendering inside the glass
