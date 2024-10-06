@@ -1,5 +1,7 @@
 # Creatures That Are Tiny
 
+![Splash screen of 'Creature That Are Tiny'. My first game made in C using raylib.](https://github.com/Shmalzfinger/CreaturesThatAreTiny_LD56/blob/main/splash_640x512.png)
+
 My Entry for Ludum Dare 56, Oct 2024.
 
 ## Controls
