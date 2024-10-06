@@ -8,6 +8,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <limits.h>		// for INT_MIN + INT_MAX
 
 int posArray[2] = { 300, 400 };
 
@@ -17,10 +18,11 @@ const int worldSizeX = 1600;
 const int worldSizeY = 900;
 
 bool pause = false;
+bool collision = false;
 
 void setup() {
 	// initialization
-	
+
 
 	
 }
@@ -47,21 +49,29 @@ void handleInput() {
 	if (IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_D)) {
 		if (posArray[0] < (worldSizeX - 1)) {
 			posArray[0] += 1;
+		} else {
+			collision = true;
 		}
 	}
 	if (IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_A)) {
 		if (posArray[0] > (worldOriginX + 1)) {
 			posArray[0] -= 1;
+		} else {
+			collision = true;
 		}
 	}
 	if (IsKeyDown(KEY_UP) || IsKeyDown(KEY_W)) {
 		if (posArray[1] > (worldOriginY + 1)) {
 			posArray[1] -= 1;
+		} else {
+			collision = true;
 		}
 	}
 	if (IsKeyDown(KEY_DOWN) || IsKeyDown(KEY_S)) {
 		if (posArray[1] < (worldSizeY - 1)) {
 			posArray[1] += 1;
+		} else {
+			collision = true;
 		}
 	}
 
@@ -90,8 +100,9 @@ int main ()
 
 	// audio stuff
 	InitAudioDevice();
-	SetMasterVolume(0.03);
+	SetMasterVolume(0.03f);
 	Music music = LoadMusicStream("resources/music/song_01.mp3");
+	Sound snd_beep1 = LoadSound("resources/sfx/beep_01.wav");
 	PlayMusicStream(music);
 
 	Font fontMono = LoadFont("VeraMono.ttf");
@@ -119,7 +130,7 @@ int main ()
 	ToggleFullscreen();
 
 	// DEBUG stuff! second monitor used to see debugging window -> remove for RELEASE!
-	SetWindowMonitor(1);
+	SetWindowMonitor(0);
 
 	// Utility function from resource_dir.h to find the resources folder and set it as the current working directory so we can load from it
 	SearchAndSetResourceDir("resources");
@@ -149,14 +160,17 @@ int main ()
 
 	//Image toEnlarge = LoadImage("bg_01.png");
 	Image toEnlarge = LoadImage("bg_01.png");
+	
+	//Image Enlarged = ImageResizeNN(toEnlarge);
+	// To draw a resized texture, you should SetTextureFilter(texture, TEXTURE_FILTER_POINT).
 
 	// SetTargetFPS(60);
 
 	// Count GetMonitorCount().toStr()
-	char str1[12] = "Mon Count: ";
-	int N = GetMonitorCount();
-	char str2[2];
-	_itoa(N, str2, 10);
+	//char str1[12] = "Mon Count: ";
+	//int N = GetMonitorCount();
+	//char str2[2];
+	//_itoa(N, str2, 10);
 	//strcat(str1, str2);
 
 	// game loop
@@ -202,7 +216,7 @@ int main ()
 		DrawTextEx(fontMono, "Creatures That Are Tiny", (Vector2) { 20, 20 }, 24, 1, WHITE); // Draw text using font and additional parameters
 		DrawText("by Treeation", 20, 40, 20, BEIGE);
 
-		DrawText(str1, 20, 120, 20, BLUE);
+		DrawText("MOVE THE CROPPING RECTANGLE WITH MOUSE", 20, 120, 20, DARKPURPLE);
 
 		char str3[50] = "Current Monitor: ";
 		int nrMon = GetCurrentMonitor();
@@ -212,13 +226,13 @@ int main ()
 		DrawText(str3, 20, 140, 20, BLUE);
 
 		char str5[4];
-		// _itoa(GetMouseX(), str5, 10);
-		_itoa(posArray[0], str5, 10);
+		_itoa(GetMouseX(), str5, 10);
+		//_itoa(posArray[0], str5, 10);
 		DrawText(str5, 20, 200, 20, RED);
 
 		char str6[4];
-		// _itoa(GetMouseY(), str6, 10);
-		_itoa(posArray[1], str6, 10);
+		_itoa(GetMouseY(), str6, 10);
+		//_itoa(posArray[1], str6, 10);
 		DrawText(str6, 80, 200, 20, RED);
 
 		char str7[16];
@@ -250,16 +264,55 @@ int main ()
 		Rectangle rect1 = { 0, 0, 64, 64 };
 		// Image backgroundCopy = ImageFromImage(background, rect1);        // Create an image from another image piece
 		// struct Color;                  // Color, 4 components, R8G8B8A8 (32bit)
-		Rectangle rectSrc = { 0, 0, 64, 64 };
+		/*Rectangle rectSrc = { 0, 0, 64, 64 };
 		Rectangle rectDst = { 0, 0, 64, 64 };
-		// 4294967295
-		// Color tintCol = { 4294967295 / 2, 4294967295, 4294967295, 255 };
-		ImageDraw(&toEnlarge, background, rectDst, rectSrc, WHITE);	// Draw a source image within a destination image (tint applied to source)
+		ImageDraw(&toEnlarge, background, rectDst, rectSrc, WHITE);*/	// Draw a source image within a destination image (tint applied to source)
+		
+		// Rectangle crop = { GetMouseX(), GetMouseY(), GetMouseX() + 32, GetMouseY() + 32 };
+		
+		int cropX1 = 0;
+		int cropY1 = 0;
+		int cropSize = 64;
+		// int cropX1 = max(cropSize, GetMouseX());
+		if ((GetMouseX() > worldOriginX + cropSize) && (GetMouseX() < (worldSizeX - cropSize))) {
+			cropX1 = GetMouseX(); //+ cropSize;
+		}
+		int cropX2 = cropX1 + cropSize;
+		if ((GetMouseY() > worldOriginY + cropSize) && (GetMouseY() < (worldSizeY - cropSize))) {
+			cropY1 = GetMouseY(); // +cropSize;
+		}
+		// int cropY1 = min(worldSizeY - cropSize, GetMouseY());
+		int cropY2 = cropY1 + cropSize;
+		Rectangle cropRect = { cropX1, cropY1, cropSize, cropSize };
+		
+		ImageCrop(& toEnlarge, cropRect);
 		Texture2D newTexture = LoadTextureFromImage(toEnlarge);
+
+		
+		// Texture2D 
+		//DrawCircle(GetMouseX() - 32, GetMouseY() - 32, 64, YELLOW);	// Draw a color-filled circle
 		//DrawTexture(newTexture, GetMouseX() - 128, GetMouseY() - 128, RED);
-		Rectangle rect3 = { GetMouseX() - 32, GetMouseY() - 32, 64, 64 };
-		Vector2 position = (Vector2){ GetMouseX(), GetMouseY() };
-		DrawTextureEx(newTexture, position, 0, 4, WHITE);  // Draw a Texture2D with extended parameters
+		//Rectangle rect3 = { GetMouseX() - 16, GetMouseY() - 16, 64, 64 };
+		Vector2 position = (Vector2){ GetMouseX() + 16, GetMouseY() + 16 };
+		
+		int frameWidth = newTexture.width / 6;
+		int frameHeight = newTexture.height;
+		// Source rectangle (part of the texture to use for drawing)
+		Rectangle sourceRec = { 0.0f, 0.0f, (float)frameWidth, (float)frameHeight };
+
+		// Destination rectangle (screen rectangle where drawing part of texture)
+		Rectangle destRec = { screenWidth / 2.0f, screenHeight / 2.0f, frameWidth * 2.0f, frameHeight * 2.0f };
+
+		Rectangle blonkRect = { GetMouseX() + 16, GetMouseY() + 64, 64, 64};
+		// Origin of the texture (rotation/scale point), it's relative to destination rectangle size
+		Vector2 origin = { (float)frameWidth, (float)frameHeight };
+
+		int rotation = 0;
+
+		DrawTexturePro(newTexture, cropRect, blonkRect, origin, (float)rotation, WHITE);
+		// here upscaling works:
+		//DrawTextureEx(newTexture, position, 0, 4, WHITE);  // Draw a Texture2D with extended parameters
+		
 		//DrawTextureRec(newTexture, rect3, position, SKYBLUE);
 		// Vector2 origin = (Vector2){ 0, 0 };
 		//Vector2 origin = (Vector2){ 0, 0 };
@@ -267,6 +320,7 @@ int main ()
 		// Rectangle rectDst = { 0, 0, 64, 64 };
 		// DrawTexturePro(newTexture, rectSrc, rectDst, origin, 0, WHITE); // Draw a part of a texture defined by a rectangle with 'pro' parameters
 		DrawTexture(glass, GetMouseX(), GetMouseY(), WHITE);
+		DrawTexture(newTexture, 1200, 700, WHITE);
 
 		// end the frame and get ready for the next one  (display frame, poll input, etc...)
 		EndDrawing();
@@ -274,6 +328,13 @@ int main ()
 		UnloadTexture(newTexture);
 
 		handleInput();
+
+		if (collision == true) {
+			if (!IsSoundPlaying(snd_beep1)) {
+				PlaySound(snd_beep1);
+			}
+			collision = false;
+		}
 
 		worldTick();
 	}
@@ -289,6 +350,7 @@ int main ()
 	void UnloadImageColors(Color * colors);
 
 	UnloadMusicStream(music);   // Unload music stream buffers from RAM
+	UnloadSound(snd_beep1);
 	CloseAudioDevice();         // Close audio device (music streaming is automatically stopped)
 
 	// destory the window and cleanup the OpenGL context

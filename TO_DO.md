@@ -59,3 +59,11 @@ Title
 note to self: 
 song_01.wav		"2010 35zhugo_4.wav"
 song_02.wav		"2010 36undichnichnochselber_2.wav"
+
+
+#### IF I HAVE TIME IN THE END
+
+add menu / title screen
+add logo bumpers (w/ sfx)
+add other sfx
+add options
