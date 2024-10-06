@@ -12,14 +12,18 @@
 
 int posArray[2] = { 300, 400 };
 
-
 const int worldOriginX = 0;
 const int worldOriginY = 0;
 const int worldSizeX = 1600;
 const int worldSizeY = 900;
 
+// TODO: Update Goal Center!!!
+//Vector2 goalCenter = { 1426, 753 };
+Vector2 goalCenter = { 1426, 753 };
+
 bool pause = false;
 bool collision = false;
+bool win = false;
 
 bool RightForbidden = false;
 bool LeftForbidden = false;
@@ -27,7 +31,8 @@ bool UpForbidden = false;
 bool DownForbidden = false;
 
 int playerSpriteIndexX = 0;  int playerSpriteIndexY = 0;
-//int itemsMax = 3;
+//int toolsMax = 3;
+//int toolSelected = 0;
 
 void setup() {
 }
@@ -50,6 +55,9 @@ bool isInBoundaries(x, y) {
 
 // function declarations
 //bool isColorForbidden(int, int, Color);
+void displayWin();
+
+void cleanup();
 
 void handleInput() {
 	// optimize: only check if a button is pressed
@@ -107,7 +115,7 @@ void worldTick() {
 
 int main ()
 {
-	setup();
+	setup(); 
 
 	int playerX = 300;
 	int playerY = 400;
@@ -115,9 +123,12 @@ int main ()
 
 	// audio stuff
 	InitAudioDevice();
-	SetMasterVolume(0.2f);
+	SetMasterVolume(0.6f);
+	// RANDOMIZE SONG?
 	Music music = LoadMusicStream("resources/music/song_01.mp3");
-	Sound snd_beep1 = LoadSound("resources/sfx/beep_01.wav");
+	Music musicWin = LoadMusicStream("resources/music/song_02.mp3");
+	//Sound snd_beep1 = LoadSound("resources/sfx/beep_01.wav");
+	Sound snd_beep1 = LoadSound("resources/sfx/hit_01.wav");
 	PlayMusicStream(music);
 
 	Font fontMono = LoadFont("VeraMono.ttf");
@@ -144,7 +155,7 @@ int main ()
 	ToggleFullscreen();
 
 	// DEBUG stuff! second monitor used to see debugging window -> remove for RELEASE!
-	SetWindowMonitor(1);
+	//SetWindowMonitor(1);
 
 	// Utility function from resource_dir.h to find the resources folder and set it as the current working directory so we can load from it
 	SearchAndSetResourceDir("resources");
@@ -198,17 +209,36 @@ int main ()
 	//char str2[2];
 	//_itoa(N, str2, 10);
 	//strcat(str1, str2);
+	
 
-	// game loop
-
-	while (!IsMusicReady(music)) {
-		//wait(5);
+	// splash screen
+	Image splashImage = LoadImage("splash.png");
+	Texture splashTex = LoadTextureFromImage(splashImage);
+	int i;
+	int spacing = 100;
+	for (i = 0; i < 250; i++) {
+		BeginDrawing();
+		ClearBackground(BLACK);
+		DrawTexture(splashTex, screenWidth, screenHeight, WHITE);
+		//DrawRectangle(worldOriginX + spacing, worldOriginY + spacing, worldSizeX - spacing * 2, worldSizeY - spacing * 2, (Color) { 112, 31, 126, 212 });
+		DrawTextEx(fontMono, "Treeation 2024", (Vector2) { worldSizeX - 400, worldSizeY - 200 }, 36, 8, BROWN);
+		//DrawTextEx(fontMono, "creatures that are tiny", (Vector2) { worldOriginX + spacing * 2, worldOriginY + spacing * 3 }, 64, 12, GOLD);
+		DrawText("Made for Ludum Dare 56. Thank you very much & enjoy!", worldSizeX - 600, worldOriginY + spacing * 7.5 + spacing / 2, 20, BLACK);
+		DrawText("Made for Ludum Dare 56. Thank you very much & enjoy!", worldSizeX - 604, worldOriginY + spacing * 7.47 + spacing / 2, 20, WHITE);
+		//if (IsImageReady(splashImage)) {
+		//	DrawImage(splashImage);
+		//}
+		EndDrawing();
 	}
+	UnloadTexture(splashTex);
+		
+	// game loop
 
 	while (!WindowShouldClose())		// run the loop untill the user presses ESCAPE or presses the Close button on the window
 	{
-		UpdateMusicStream(music);   // Update music buffer with new stream data
 		
+		if (!win) UpdateMusicStream(music);   // Update music buffer with new stream data
+		if (win) UpdateMusicStream(musicWin);
 		// Restart music playing (stop and play)
 		if (IsKeyPressed(KEY_SPACE))
 		{
@@ -239,40 +269,37 @@ int main ()
 		DrawTextEx(fontMono, "Creatures That Are Tiny", (Vector2) { 20, 20 }, 24, 1, WHITE); // Draw text using font and additional parameters
 		DrawText("by Treeation", 20, 40, 20, BEIGE);
 
-		DrawText("MOVE WITH WASD OR ARROW KEYS AND USE YOURR MOUSE :)", 20, 120, 20, DARKPURPLE);
+		DrawText("MOVE WITH WASD OR ARROW KEYS AND USE YOUR MOUSE :)", 20, 120, 20, DARKPURPLE);
 
-		char str3[50] = "Current Monitor: ";
+		/*char str3[50] = "Current Monitor: ";
 		int nrMon = GetCurrentMonitor();
 		char str4[1];
 		_itoa(nrMon, str4, 10);
 		strcat(str3, str4);
-		DrawText(str3, 20, 140, 20, BLUE);
+		DrawText(str3, 20, 140, 20, BLUE);*/
+		DrawText("Escape to quit.", 20, 140, 20, BLUE);
 
-		char str5[4];
-		_itoa(GetMouseX(), str5, 10);
-		//_itoa(posArray[0], str5, 10);
-		DrawText(str5, 20, 200, 20, RED);
+		// DEBUGGING DISPLAYS
+		//char str5[4];
+		//_itoa(GetMouseX(), str5, 10);
+		//DrawText(str5, 20, 200, 20, RED);
 
-		char str6[4];
-		_itoa(GetMouseY(), str6, 10);
-		DrawText(str6, 80, 200, 20, RED);
+		//char str6[4];
+		//_itoa(GetMouseY(), str6, 10);
+		//DrawText(str6, 80, 200, 20, RED);
 
-		char str7[16];
-		char str8[16];
-		char str9[16];
+		//char str7[16];
+		//char str8[16];
+		//char str9[16];
 		int colorIndex = (posArray[1] * backgroundWidth) + posArray[0];
 		Color pixel = colors[colorIndex];
-		_itoa(pixel.r, str7, 10);
-		_itoa(pixel.g, str8, 10);
-		_itoa(pixel.b, str9, 10);
-		// TO DO set 2d array with boolean values that represents a grid of colliding walls (colors),
-		// so we can check at input handling if we are colliding 
+		//_itoa(pixel.r, str7, 10);
+		//_itoa(pixel.g, str8, 10);
+		//_itoa(pixel.b, str9, 10);
 
-		//char pixelStr[64] = { strcat(str7, str8) };
-		//pixelStr[] = strcat(pixelStr, str9);
-		DrawText(str7, 20, 240, 20, RED);
-		DrawText(str8, 80, 240, 20, GREEN);
-		DrawText(str9, 140, 240, 20, BLUE);
+		//DrawText(str7, 20, 240, 20, RED);
+		//DrawText(str8, 80, 240, 20, GREEN);
+		//DrawText(str9, 140, 240, 20, BLUE);
 
 		// Get right pixel color
 		colorIndex = (posArray[1] * backgroundWidth) + posArray[0] + 1;
@@ -388,13 +415,39 @@ int main ()
 		// if player is in glasse area, draw BIG smol player from spritesheet
 		// CheckCollisionSpheres(Vector3 center1, float radius1, Vector3 center2, float radius2);
 		// vector3 center1
-		if (CheckCollisionCircles((Vector2) { posArray[0], posArray[1] }, 16, (Vector2) { GetMouseX() + 56, GetMouseY() + 56 }, 16)) {
-			playerRec.x = playerSpriteIndexX * (float)playerSheet.width / playerSpritesTotalX;
-			playerRec.y = playerSpriteIndexY * (float)playerSheet.height / playerSpritesTotalY;
-			//playerRec.x = 0;
 		
-			DrawTextureRec(playerSheet, playerRec, (Vector2) { posArray[0] - 16, posArray[1] - 16 }, WHITE);
-			//DrawTexture(playerSheet, posArray[0], posArray[1], WHITE);
+		if (CheckCollisionCircles((Vector2) { posArray[0], posArray[1] }, 16, goalCenter, 24)) {
+			win = true;
+			displayWin();
+			int spacing = 100;
+			DrawRectangle(worldOriginX + spacing, worldOriginY + spacing, worldSizeX - spacing * 2, worldSizeY - spacing * 2, DARKPURPLE);
+			DrawTextEx(fontMono, "YOU ARE HAPPY! YOU HAVE WON!", (Vector2) { worldOriginX + spacing * 2, worldOriginY + spacing * 3 }, 64, 12, GOLD);
+			DrawTextEx(fontMono, "CONGRATULATIONS!!!!", (Vector2) { worldOriginX + spacing * 2.01, worldOriginY + spacing * 3.01 + spacing / 2 }, 64, 12, BLACK);
+			DrawTextEx(fontMono, "CONGRATULATIONS!!!!", (Vector2) { worldOriginX + spacing * 2, worldOriginY + spacing * 3 + spacing / 2 }, 65, 12, GOLD);
+			DrawText("PRESS ESCAPE TO QUIT.", 120, 600, 18, DARKPURPLE);
+			StopMusicStream(music);
+			PlayMusicStream(musicWin);
+			//EndDrawing();
+			//waitTime(3);
+			//cleanup();	// not yet really cleaning up!
+			//OpenURL(const char* url)
+			//return 0;
+		}
+		else {
+			win = false;
+		}
+
+		if (!(GetMouseX() < (worldSizeX - 32) && GetMouseY() < (worldSizeY - 32))) {
+			return;
+		} else {
+			if (CheckCollisionCircles((Vector2) { posArray[0], posArray[1] }, 16, (Vector2) { GetMouseX() + 56, GetMouseY() + 56 }, 16)) {
+				playerRec.x = playerSpriteIndexX * (float)playerSheet.width / playerSpritesTotalX;
+				playerRec.y = playerSpriteIndexY * (float)playerSheet.height / playerSpritesTotalY;
+				//playerRec.x = 0;
+		
+				DrawTextureRec(playerSheet, playerRec, (Vector2) { posArray[0] - 16, posArray[1] - 16 }, WHITE);
+				//DrawTexture(playerSheet, posArray[0], posArray[1], WHITE);
+			}
 		}
 		//DrawTextureRec(newTexture, rect3, position, SKYBLUE);
 		// Vector2 origin = (Vector2){ 0, 0 };
@@ -402,7 +455,10 @@ int main ()
 		// Rectangle rectSrc = { 0, 0, 32, 32 };
 		// Rectangle rectDst = { 0, 0, 64, 64 };
 		// DrawTexturePro(newTexture, rectSrc, rectDst, origin, 0, WHITE); // Draw a part of a texture defined by a rectangle with 'pro' parameters
-		DrawTexture(glass, GetMouseX(), GetMouseY(), WHITE);
+		
+		if (GetMouseX() < (worldSizeX - 32) && GetMouseY() < (worldSizeY - 32)) {
+			DrawTexture(glass, GetMouseX(), GetMouseY(), WHITE);
+		}
 
 		// end the frame and get ready for the next one  (display frame, poll input, etc...)
 		EndDrawing();
@@ -425,16 +481,22 @@ int main ()
 	ShowCursor();
 	UnloadTexture(glass);
 	UnloadTexture(playerSheet);
-	UnloadImage(toEnlarge); 
+	UnloadImage(toEnlarge);
+	//UnloadTexture(newTexture);
 	//UnloadImage(alphaMask);
 	UnloadFont(fontMono);
-	void UnloadImageColors(Color * colors);
+	void UnloadImageColors(Color* colors);
 	UnloadMusicStream(music);   // Unload music stream buffers from RAM
+	UnloadMusicStream(musicWin);
 	UnloadSound(snd_beep1);
 	CloseAudioDevice();         // Close audio device (music streaming is automatically stopped)
 	CloseWindow();
 	return 0;
 }
+
+//void cleanup() {
+//
+//}
 
 // function definitions
 bool isColorForbidden(int x, int y, Color* colors) {
@@ -455,3 +517,6 @@ bool isColorForbidden(int x, int y, Color* colors) {
 	//_itoa(pixel.b, str9, 10);
 }
 
+void displayWin() {
+
+}
