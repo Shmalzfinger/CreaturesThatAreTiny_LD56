@@ -15,6 +15,10 @@ If you can't see it, find it first. :-)
 
 ---
 
+### System Requirements
+The binary is compiled for Windows and requires a screen resolution of
+at least 1600 x 900.
+
 ## Assets
 
 All images, music and sound effects created by myself.
