@@ -11,6 +11,11 @@
 
 int posArray[2] = { 300, 400 };
 
+const int worldOriginX = 0;
+const int worldOriginY = 0;
+const int worldSizeX = 1600;
+const int worldSizeY = 900;
+
 void setup() {
 	// initialization
 	//Font LoadFont("VeraMono.ttf");
@@ -25,6 +30,16 @@ void drawPlayer(int x, int y) {
 	DrawPixel(x, y, WHITE);
 }
 
+bool isInBoundaries(x, y) {
+	// true if this condition is met
+	if ((x > 0) && (x < (worldSizeX - 2)) && (y > 0) && (y < (worldSizeY - 2))) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
 void handleInput() {
 
 	//int pressedKey = GetKeyPressed();
@@ -35,13 +50,26 @@ void handleInput() {
 	//	default:									break;
 	//}
 
-	if (IsKeyDown(KEY_RIGHT)) {
-		posArray[0] += 1;
+	if (IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_D)) {
+		if (posArray[0] < (worldSizeX - 1)) {
+			posArray[0] += 1;
+		}
 	}
-	if (IsKeyDown(KEY_LEFT)) posArray[0] -= 1;
-	if (IsKeyDown(KEY_UP)) posArray[1] -= 1;
-	if (IsKeyDown(KEY_DOWN)) posArray[1] += 1;
-
+	if (IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_A)) {
+		if (posArray[0] > (worldOriginX + 1)) {
+			posArray[0] -= 1;
+		}
+	}
+	if (IsKeyDown(KEY_UP) || IsKeyDown(KEY_W)) {
+		if (posArray[1] > (worldOriginY + 1)) {
+			posArray[1] -= 1;
+		}
+	}
+	if (IsKeyDown(KEY_DOWN) || IsKeyDown(KEY_S)) {
+		if (posArray[1] < (worldSizeY - 1)) {
+			posArray[1] += 1;
+		}
+	}
 	//if (pressedKey != 0) {
 	//	printf("KEY: %i\n", pressedKey);
 	//}
@@ -64,9 +92,6 @@ void worldTick() {
 int main ()
 {
 	setup();
-
-	const int worldSizeX = 1600;
-	const int worldSizeY = 900;
 
 	int playerX = 300;
 	int playerY = 400;
@@ -112,6 +137,8 @@ int main ()
 	// NOTE: Textures MUST be loaded after Window initialization (OpenGL context is required)
 
 	Image background = LoadImage("bg_01.png");						// Load image data into CPU memory (RAM)
+	Color* colors = LoadImageColors(background);
+	int backgroundWidth = background.width;
 	Texture2D tex_background = LoadTextureFromImage(background);	// Image converted to texture, GPU memory (RAM -> VRAM)
 	UnloadImage(background);										// Unload image data from CPU memory (RAM)
 
@@ -132,7 +159,7 @@ int main ()
 	int N = GetMonitorCount();
 	char str2[2];
 	_itoa(N, str2, 10);
-	strcat(str1, str2);
+	//strcat(str1, str2);
 
 	// game loop
 	while (!WindowShouldClose())		// run the loop untill the user presses ESCAPE or presses the Close button on the window
@@ -164,12 +191,30 @@ int main ()
 		DrawText(str3, 20, 140, 20, BLUE);
 
 		char str5[3];
-		_itoa(GetMouseX(), str5, 10);
+		// _itoa(GetMouseX(), str5, 10);
+		_itoa(posArray[0], str5, 10);
 		DrawText(str5, 20, 200, 20, RED);
 
 		char str6[3];
-		_itoa(GetMouseY(), str6, 10);
+		// _itoa(GetMouseY(), str6, 10);
+		_itoa(posArray[1], str6, 10);
 		DrawText(str6, 80, 200, 20, RED);
+
+		char str7[16];
+		char str8[16];
+		char str9[16];
+		//Color GetPixelColor(void* srcPtr, int format);
+		int index = (posArray[1] * backgroundWidth) + posArray[0];
+		Color pixel = colors[index];
+		_itoa(pixel.r, str7, 10);
+		_itoa(pixel.g, str8, 10);
+		_itoa(pixel.b, str9, 10);
+
+		//char pixelStr[64] = { strcat(str7, str8) };
+		//pixelStr[] = strcat(pixelStr, str9);
+		DrawText(str7, 20, 240, 20, RED);
+		DrawText(str8, 80, 240, 20, GREEN);
+		DrawText(str9, 140, 240, 20, BLUE);
 
 		// draw our texture to the screen
 		// if this is currently the glass, then do magnifying stuff!
@@ -218,7 +263,8 @@ int main ()
 	ShowCursor();
 	// unload our texture so it can be cleaned up
 	UnloadTexture(glass);
-
+	UnloadImage(toEnlarge);
+	void UnloadImageColors(Color * colors);
 
 	// destory the window and cleanup the OpenGL context
 	CloseWindow();
