@@ -130,7 +130,7 @@ int main ()
 	ToggleFullscreen();
 
 	// DEBUG stuff! second monitor used to see debugging window -> remove for RELEASE!
-	SetWindowMonitor(0);
+	SetWindowMonitor(1);
 
 	// Utility function from resource_dir.h to find the resources folder and set it as the current working directory so we can load from it
 	SearchAndSetResourceDir("resources");
@@ -274,7 +274,7 @@ int main ()
 		
 		int cropX1 = 0;
 		int cropY1 = 0;
-		int cropSize = 64;
+		int cropSize = 16;
 		// int cropX1 = max(cropSize, GetMouseX());
 		if ((GetMouseX() > worldOriginX + cropSize) && (GetMouseX() < (worldSizeX - cropSize))) {
 			cropX1 = GetMouseX(); //+ cropSize;
@@ -287,7 +287,7 @@ int main ()
 		int cropY2 = cropY1 + cropSize;
 		Rectangle cropRect = { cropX1, cropY1, cropSize, cropSize };
 		
-		ImageCrop(& toEnlarge, cropRect);
+		//ImageCrop(& toEnlarge, cropRect);
 		Texture2D newTexture = LoadTextureFromImage(toEnlarge);
 
 		
@@ -305,13 +305,16 @@ int main ()
 		// Destination rectangle (screen rectangle where drawing part of texture)
 		Rectangle destRec = { screenWidth / 2.0f, screenHeight / 2.0f, frameWidth * 2.0f, frameHeight * 2.0f };
 
-		Rectangle blonkRect = { GetMouseX() + 16, GetMouseY() + 64, 64, 64};
+		Rectangle blonkRect = { GetMouseX() + 16, GetMouseY() + 16, 64, 64};
 		// Origin of the texture (rotation/scale point), it's relative to destination rectangle size
-		Vector2 origin = { (float)frameWidth, (float)frameHeight };
+		//Vector2 origin = { (float)frameWidth, (float)frameHeight };
+		Vector2 origin = { (0, 0) };
 
 		int rotation = 0;
-
+		//DrawTexturePro(Texture2D texture, Rectangle source, Rectangle dest, Vector2 origin, float rotation, Color tint); 
+		// text, source, dest, origin, rotation, color
 		DrawTexturePro(newTexture, cropRect, blonkRect, origin, (float)rotation, WHITE);
+		
 		// here upscaling works:
 		//DrawTextureEx(newTexture, position, 0, 4, WHITE);  // Draw a Texture2D with extended parameters
 		
@@ -322,7 +325,6 @@ int main ()
 		// Rectangle rectDst = { 0, 0, 64, 64 };
 		// DrawTexturePro(newTexture, rectSrc, rectDst, origin, 0, WHITE); // Draw a part of a texture defined by a rectangle with 'pro' parameters
 		DrawTexture(glass, GetMouseX(), GetMouseY(), WHITE);
-		DrawTexture(newTexture, 1200, 700, WHITE);
 
 		// end the frame and get ready for the next one  (display frame, poll input, etc...)
 		EndDrawing();

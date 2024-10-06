@@ -3,8 +3,9 @@
 Add license
 
 some sort of magnification rendering inside the glass
-print resolution. limit play area?
+display resolution. limit play area?
 use rayGUI for menu? change font. fade out text
+how to compile resources into .exe?
 
 ## try
 Color GetImageColor(Image image, int x, int y);    // Get image pixel color at (x, y) position
@@ -63,6 +64,7 @@ song_02.wav		"2010 36undichnichnochselber_2.wav"
 
 #### IF I HAVE TIME IN THE END
 
+Fisheye shader from https://www.raylib.com/examples/shaders/loader.html?name=shaders_postprocessing
 add menu / title screen
 add logo bumpers (w/ sfx)
 add other sfx
