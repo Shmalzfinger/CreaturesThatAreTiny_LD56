@@ -244,6 +244,8 @@ int main ()
 		_itoa(pixel.r, str7, 10);
 		_itoa(pixel.g, str8, 10);
 		_itoa(pixel.b, str9, 10);
+		// TO DO set 2d array with boolean values that represents a grid of colliding walls (colors),
+		// so we can check at input handling if we are colliding 
 
 		//char pixelStr[64] = { strcat(str7, str8) };
 		//pixelStr[] = strcat(pixelStr, str9);
